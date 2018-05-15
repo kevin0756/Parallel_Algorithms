@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="Series" basedir="." default="main">
+	<property name="src.dir"      value="src"  />
+	<property name="libs.dir"     value="libs" />
+	<property name="build.dir"    value="bin"  />
+	<property name="gen.dir"      value="gen"  />
+	<property name="tempGen.dir"  value="tempGen"/>
+	<property name="tempCompile.dir" value="tempCompile"/>
+	<property name="SERJAR.dir"   value="${gen.dir}/Series"/>
+	<property name="@PTJAR"     value="${libs.dir}/@PT-1.5.2.jar" />
+	<property name="JOMPJAR"      value="${libs.dir}/jomp-1.0.jar"    />
+	<property name="SEREXECJAR"   value="${SERJAR.dir}/Series.jar" />
+	
+	<target name="decideOS">
+		<condition property="isWindows">
+			<os family="windows"/>
+		</condition>
+		<condition property="isLinux">
+			<os family="unix"/>
+		</condition>
+	</target>
+	
+	<target name="winDelim" depends="decideOS" if="isWindows">
+		<property name="Delimiter" value=";" />
+		<echo message="The OS is identified to be of Windows family!" />
+	</target>
+	
+	<target name="linDelim" depends="decideOS" if="isLinux">
+		<property name="Delimiter" value=":" />
+		<echo message="The OS is identified to be of Unix/Linux family!" />
+	</target>
+	
+	<target name="clean" depends="winDelim, linDelim">
+		<delete dir="${build.dir}" />
+		<delete dir="${SERJAR.dir}" />
+	</target>
+	
+	<target name="mkDir" depends="clean">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${gen.dir}"  />
+		<mkdir dir="${SERJAR.dir}"/>
+	</target>
+	
+	<target name="compile" depends="mkDir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"/>
+				<pathelement path="${JOMPJAR}" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<!-- CREATING THE EXECUTABLE JAR FILE -->
+	
+	<target name="compressJar" depends="compile">
+		<jar destfile="${SEREXECJAR}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class"  value="main.Main" />
+			</manifest>
+			<zipgroupfileset dir="${libs.dir}"  includes="**/*.jar"/>
+		</jar>
+	</target>
+	
+	<!-- EXECUTING THE EXECUTABLE JAR FILE -->
+	
+	<target name="main" depends="compressJar">
+		<java jar="${SEREXECJAR}" fork="true"></java>
+	</target>
+	
+	<!-- ************* PROCESSING ANNOTATIONS ************** -->
+	
+	<target name="tempClean" depends="linDelim, winDelim">
+		<delete dir="${gen.dir}"/>
+		<delete dir="${tempGen.dir}"/>
+		<delete dir="${tempCompile.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<mkdir dir="${tempGen.dir}"/>
+		<mkdir dir="${tempCompile.dir}"/>
+	</target>
+	
+	<target name="tempCompile" depends="tempClean">
+		<javac srcdir="${src.dir}" destdir="${tempCompile.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"/>
+				<pathelement path="${JOMPJAR}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="process" depends="tempCompile">
+		<exec executable="java">
+			<arg line="-cp ${tempCompile.dir}${Delimiter}${@PTJAR}${Delimiter}${JOMPJAR} spoon.Launcher -i ${src.dir} -o ${gen.dir} -p apt.processors.AptInitParaTaskProcessor"/>
+		</exec>
+		<exec executable="java">
+			<arg line="-cp ${tempCompile.dir}${Delimiter}${@PTJAR}${Delimiter}${JOMPJAR} spoon.Launcher -i ${gen.dir} -o ${tempGen.dir} -p apt.processors.AptFutureProcessor"/>
+		</exec>
+		<delete dir="${gen.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<exec executable="java">
+			<arg line="-cp ${tempCompile.dir}${Delimiter}${@PTJAR}${Delimiter}${JOMPJAR} spoon.Launcher -i ${tempGen.dir} -o ${gen.dir} -p apt.processors.AptGuiProcessor"/>
+		</exec>
+		<delete dir="${tempGen.dir}"/>
+	</target>
+	
+	<target name="clearTempCompile" depends="process">
+		<delete dir="${tempCompile.dir}"/>
+	</target>
+	
+	<target name="processAnnotation" depends="clearTempCompile">
+		<echo message="Processing Annotation"/>
+	</target>
+</project>

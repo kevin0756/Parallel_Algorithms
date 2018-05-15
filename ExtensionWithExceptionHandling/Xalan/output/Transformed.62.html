@@ -1,0 +1,2117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<div class="div1">
+<h2><a name="expr"></a>1 XPath Expressions in XForms</h2> 
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.1 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.2 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.3 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.4 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.5 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.5.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.5.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.5.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.6 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.7 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.8 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.9 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.10 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.11 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.11.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.11.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.11.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.12 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.13 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.14 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.15 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.16 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.17 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.17.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.17.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.17.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.18 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.19 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.20 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.21 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.22 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.23 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.23.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.23.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.23.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.24 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.25 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.26 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.27 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.28 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.29 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.29.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.29.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.29.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.30 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.31 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.32 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.33 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.34 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.35 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.35.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.35.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.35.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.36 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.37 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.38 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.39 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.40 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.41 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.41.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.41.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.41.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.42 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.43 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.44 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.45 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.46 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.47 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.47.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.47.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.47.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.48 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.49 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.50 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.51 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.52 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.53 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.53.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.53.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.53.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.54 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.55 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.56 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.57 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.58 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.59 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.59.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.59.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.59.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.60 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.61 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.62 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.63 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.64 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.65 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.65.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.65.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.65.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.66 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+<p>XPath is used within XForms to address instance data, as well as to perform basic operations, such as declaratively stating when a <a title="" href="#">form control</a>
+   needs to be filled out, or defining a computation over other values such as unit prices, quantities, discounts, and tax and shipping costs. This chapter describes how XForms uses XPath, and additional XForms functions for use in forms.</p>
+
+<div class="div2">
+<h3><a name="expr-datatypes"></a>1.67 Datatypes</h3>
+<p>In general, XPath uses a smaller set of datatypes than XML Schema.  XForms allows arbitrary Schema datatypes, including those defined in <a href="#"><b>???</b></a>, while XPath datatypes are limited to <code>boolean</code>, <code>string</code>, <code>number</code>, and <code>node-set</code>. (For completeness, XPath additionally has external objects and result tree fragments, but there is no special treatment for these types in the XForms specification.)</p>
+  
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Resource-limited XForms Processors may define implementation
+limits on the maximum size of a <code>node-set</code>.</p></div>
+
+<p>The XForms specification is defined such that it is always clear whether XPath or XML Schema datatypes are used within a particular context. <a title="" href="#">Binding expression</a>s and <a title="" href="#">computed expression</a>s always use XPath datatypes, while everything else uses XML Schema datatypes.</p>
+
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>A future version of XForms is expected to use XPath 2.0, which includes support for XML Schema datatypes, which will make the above distinction moot. </p></div></div>
+
+<div class="div2">
+<h3><a name="expr-instance"></a>1.68 Instance Data</h3>
+
+<p>Every form has a current state, representing the values entered at any particular point in time. Within XForms, for each <code>xform</code> element, the XForms Processor must behave as if it internally maintains an XML  data structure modeled as a tree to represent the state of the form. This data structure is called <a title="" href="#">instance data</a> and conforms to the XPath Data Model <a href="#">[ref-xpath-1.0]</a>. Additionally, each node in the tree contains a boolean "dirty" flag, which is referenced elsewhere by the XForms Processing Model. In this context, "dirty" indicates that the data value might need to be refreshed in the presentation.</p>
+  
+<p>Elements and attributes in the instance data may have namespace information associated with them, as defined in the XPath Data Model. Unless otherwise specified, all instance data elements and attributes are unqualified. Instance data elements and attributes may not belong to  the XForms namespace.</p>
+  
+<div class="issue"><p class="prefix"><a name="issue-instance-data-access"></a><b>Issue (issue-instance-data-access):</b></p><p>Should there be specified a  DOM form of access (perhaps a document fragment), that maps to the instance data? If so, should it be read-only or read-write access? What are possible security 
+  implications here?</p></div><p>The rules for defining the root and context nodes of the instance data are found in in the following section.</p>
+        
+ 
+  
+
+  
+
+</div><div class="div2">
+<h3><a name="expr-eval"></a>1.69 Evaluation Context</h3>
+
+<p>Applied to XForms, XPath references abstract <a title="" href="#">instance data</a> (using the "path" portion of XPath), instead of a discrete XML document. This reference is called a <a title="" href="#">binding expression</a> in this specification.</p><p>The following context is used for evaluating all XPath expressions in XForms:</p>
+  
+<ol><li><p>The context node for <b>outermost</b> binding elements (such as XForms UI elements) 
+    is the XPath root (<code>/</code>). A "<b>binding element</b>" 
+    is any element that is explicitly allowed to have an <code>xform:ref</code>
+    attribute. An XForms element is "<b>outermost</b>" when the node-set returned by the XPath expression 
+    <code>ancestor::*</code> includes no <b>binding element</b> nodes.</p><div class="note"><p class="prefix"><b>Note:</b></p><p>The contents of the instance data below the XPath root node (<code>/</code>) are dependent on how the instance data was constructed, which is defined in <a href="#"><b>???</b></a>.</p></div></li><li><p>The context node for non-<b>outermost</b> binding elements 
+    is determined by evaluating the binding expression of the <b>immediately enclosing</b> 
+    element. An element is "<b>immediately enclosing</b>" when it is the first 
+    <b>binding element </b>node in the node-set returned by the XPath expression <code>ancestor::*</code>. This 
+    is also referred to as "scoped resolution".</p></li><li><p>The context size and position are both exactly 1.</p></li><li><p>No variable bindings are in place.</p></li><li><p>The available function library is defined below.</p></li><li><p>Any namespace declarations in scope for the attribute that defines the  expression are applied to the expression.</p></li></ol>
+
+
+
+<p>Example:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;repeat ref="element1/foo/bar"&gt;
+  &lt;selectOne ref="element2" ... /&gt;
+  &lt;selectOne ref="@attr" ... /&gt;
+&lt;/repeat&gt;</pre></td></tr></table>
+  <p>In this example, the <code>repeat</code> has a binding expression
+   of <code>element1/foo/bar</code>. According to the rules above, this outermost
+   element would have a context node of <code>/</code>, which is the root of the instance data, or the parent to the <code>element1</code> element. Both of the <code>selectOne</code>s then inherit a context node from
+   their parent, the context node being <code>/element1/foo/bar</code>. Based on this,
+   the <code>selectOne</code> binding expressions evaluate respectively to
+   <code>/element1/foo/bar/element2</code> and <code>/element1/foo/bar/@attr</code>.
+   Matching instance data follows:</p>
+<table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;element1&gt;
+  &lt;foo&gt;
+    &lt;bar attr="xyz"&gt;
+      &lt;element2&gt;xyz&lt;/element2&gt;
+    &lt;/bar&gt;
+  &lt;/foo&gt;
+&lt;/element1&gt;</pre></td></tr></table>
+
+
+  
+
+</div>
+
+<div class="div2">
+<h3><a name="expr-canonical"></a>1.70 Canonical Binding Expressions</h3><p>As with XPath, it is possible to construct many different binding 
+  expressions that end up returning the same node-set. That said, it is 
+  often useful to express a binding expression in a standard, compact representation,
+  defined as a canonical binding expression.</p>
+
+<p>Canonical binding expressions are represented as an <code>AbsoluteLocationPath</code> as 
+  defined in <a href="#">[ref-xpath-1.0]</a>. Additionally, canonical binding expressions use
+  only default abbreviated axis-specifiers (for elements) or the '@' abbreviation
+  (for attributes). Examples:</p>
+<ul>
+  <li><p>(canonical) <code>/a/b/c</code></p></li>
+  <li><p>(canonical) <code>/a/b/@c</code></p></li>
+  <li><p>(non-canonical) <code>a/b/c</code> (not an absolute path)</p></li>
+  <li><p>(non-canonical) <code>child::a/child::b/child::c</code></p></li>
+  <li><p>(non-canonical) <code>/a/b/c/d/ancestor::c</code></p></li>
+</ul></div><div class="div2">
+<h3><a name="expr-lib"></a>1.71 Forms Core Function Library</h3>
+
+<p>The XForms Core Function Library includes the entire <a href="#">[ref-xpath-1.0]</a>
+  Core Function Library, including operations on node-sets, strings, numbers, 
+  and booleans.</p>
+  
+<p>This section defines a set of required functions for use within XForms.</p>
+
+<div class="issue"><p class="prefix"><a name="xpath-core-lib"></a><b>Issue (xpath-core-lib):</b></p><p> Further input is required on the ability for resource-constrained 
+  devices to implement the complete XPath Core Function Library.</p></div>
+  
+<div class="div3">
+<h4><a name="expr-lib-num"></a>1.71.1 Number Methods</h4>
+
+<p><em>number</em> <b>average</b>(<var>node-set</var>)</p>
+
+<p>The <code>average</code> function returns the arithmetic 
+  average value, for each node in the argument node-set, of the result of converting 
+  the string-values of each node to a number. The sum is computed with <code>sum()</code>, and divided with <code>div</code> by the value computed with <code>count()</code>.</p>
+  
+<p><em>number</em> <b>min</b>(<var>node-set</var>)</p>
+
+<p>The <code>min</code> function returns the minimum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Minimum" is determined with the <code>&lt;</code> operator.</p>
+  
+<p><em>number</em> <b>max</b>(<var>node-set</var>)</p>
+
+<p>The <code>max</code> function returns the maximum value, 
+  for each node in the argument node-set, of the result of converting the string-values of the node 
+  to a number. "Maximum" is determined with the <code>&lt;</code> operator.</p>
+
+<p><em>number</em> <b>count-non-empty</b>(<var>node-set</var>)</p>
+
+<p>The <code>count-non-empty</code> function returns the number of non-empty
+  nodes in the argument node-set. A node is considered non-empty if it is convertible
+  into a string with a greater-than zero length.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following core functions are defined within <a href="#">[ref-xpath-1.0]</a>
+  - <code>number(), sum(), floor(), ceiling(), and round()</code></p></div>
+<div class="note"><p class="prefix"><b>Note:</b></p><p>The following useful numeric and boolean operators are defined within <a href="#">[ref-xpath-1.0]</a>
+  - "<code>+</code>", "<code>-</code>", "<code>*</code>", "<code>div</code>", "<code>mod</code>",
+  unary "<code>-</code>" ,"<code>=</code>", "<code>!=</code>", "<code>&lt;</code>", "<code>&gt;</code>",
+  "<code>&lt;=</code>", "<code>&gt;=</code>", "<code>or</code>", "<code>and</code>".</p>
+  </div></div>
+
+<div class="div3">
+<h4><a name="expr-lib-string"></a>1.71.2 String Methods</h4>
+
+<p><em>string</em> <b>now</b>()</p>
+
+<p>The <code>now</code> function returns the current system 
+  time as a string value, in the canonical format defined within the XForms specification. 
+  If local time zone information is available, it is included in the string.</p>
+
+<div class="note"><p class="prefix"><b>Note:</b></p><p>Note: the following are defined within <a href="#">[ref-xpath-1.0]</a> 
+  - <code>string(), concat(), starts-with(), contains(), substring-before(), substring-after(), 
+  substring(), string-length(), normalize-space(), and translate().</code></p></div>
+</div>
+
+<div class="div3">
+<h4><a name="expr-lib-misc"></a>1.71.3 Miscellaneous Methods</h4>
+
+<p><em>boolean</em> <b>submit</b>()</p>
+
+<p>The <code>submit</code> function immediately submits 
+  the instance data bound to the node that contains the expression by triggering an <code>xforms-submit</code> event.</p>
+  
+<p><em>boolean</em> <b>reset</b>()</p>
+
+<p>The <code>reset</code> function immediately resets the 
+  instance data bound to the node that contains the expression by triggering an <code>xforms-reset</code> event.</p>
+
+<p><em>string</em> <b>xforms-property</b>(<var>string</var>)</p>
+
+<p>The <code>xforms-property</code> function accesses the XForms Property (defined in
+  <a href="#"><b>???</b></a>) named by the string parameter, and returns the value of the property.</p>
+
+</div>
+</div>
+
+<div class="div2">
+<h3><a name="expr-extend"></a>1.72 Extensibility</h3>
+<div class="issue"><p class="prefix"><a name="user-extensions"></a><b>Issue (user-extensions):</b></p><p>This section will be expanded in future revisions, to cover extension functions 
+  and methods for calling out to script, perhaps something along the lines of <code>element-available</code> and <code>function-available</code>.</p></div>
+</div>
+
+</div>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="LUSearch" basedir="." default="main">
+	<property name="src.dir" value="src" />
+	<property name="lib.dir" value="libs"/>
+	<property name="gen.dir" value="gen" />
+	<property name="tempGen.dir" value="tempGen"/>
+	<property name="tempCompile.dir" value="tempbuild"/>
+	<property name="build.dir" value="bin"/>
+	<property name="LUJAR.dir" value="${gen.dir}/LUSearch" />
+	<property name="@PTJAR"  value="${lib.dir}/@PT-1.5.2.jar" />
+	<property name="JOMPJAR"   value="${lib.dir}/jomp-1.0.jar"    />
+	<property name="PJJAR"     value="${lib.dir}/pyjama-1.5.2.jar"/>
+	<property name="LUCENEJAR" value="${lib.dir}/lucene-2.4.jar"  />
+	<property name="LUEXECJAR" vaLue="${LUJAR.dir}/LUSearch.jar"  />
+	
+	<target name="decideOS">
+		<condition property="isWindows">
+			<os family="windows"/>
+		</condition>
+		
+		<condition property="isLinux">
+			<os family="unix"/>
+		</condition>
+	</target>
+	
+	<target name="winDelim" depends="decideOS" if="isWindows">
+		<property name="Delimiter"  value=";"/>
+		<echo message="The OS is identified to be of Windows family!"/>
+	</target>
+	
+	<target name="linDelim" depends="decideOS" if="isLinux">
+		<property name="Delimiter"  value=":"/>
+		<echo message="The OS is identified to be of Unix/Linux family!" />
+	</target>
+	
+	<target name="clean" depends="winDelim, linDelim">
+		<delete dir="${build.dir}" />
+		<delete dir="${LUJAR.dir}" />
+	</target>
+	
+	<target name="mkDir" depends="clean">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<mkdir dir="${LUJAR.dir}"/>
+	</target>
+	
+	<target name="compile" depends="mkDir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"  />
+				<pathelement path="${PJJAR}"     />
+				<pathelement path="${JOMPJAR}"   />
+				<pathelement path="${LUCENEJAR}" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="compressJar" depends="compile">
+		<jar destfile="${LUEXECJAR}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="main.Main"/>
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+		</jar>
+	</target>
+	
+	<target name="main" depends="compressJar">
+		<java jar="${LUEXECJAR}" fork="true">
+		</java>
+	</target>
+	
+	<!-- *****************   PROCESSING ANNOTATIONS   ****************** -->
+	
+	<target name="tempMakeDir" depends="winDelim, linDelim">
+		<delete dir="${gen.dir}"/>
+		<delete dir="${tempGen.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<mkdir dir="${tempGen.dir}"/>
+		<mkdir dir="${tempCompile.dir}"/>
+	</target>
+	
+	<target name="tempCompile" depends="tempMakeDir">
+		<javac srcdir="${src.dir}" destdir="${tempCompile.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"  />
+				<pathelement path="${JOMPJAR}" />
+				<pathelement path="${LUCENEJAR}"/>
+				<pathelement path="${PJJAR}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	
+	<target name="process" depends="tempCompile">
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${LUCENEJAR}${Delimiter}${tempCompile.dir} 
+				spoon.Launcher -i ${src.dir} -o ${gen.dir} -p apt.processors.AptInitParaTaskProcessor"/>
+		</exec>
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${LUCENEJAR}${Delimiter}${tempCompile.dir}
+				spoon.Launcher -i ${gen.dir} -o ${tempGen.dir} -p apt.processors.AptFutureProcessor" />
+		</exec>
+		<delete dir="${gen.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${LUCENEJAR}${Delimiter}${tempCompile.dir}
+				 spoon.Launcher -i ${tempGen.dir} -o ${gen.dir} -p apt.processors.AptGuiProcessor"/>
+		</exec>
+		<delete dir="${tempGen.dir}"/>
+	</target>
+	
+	<target name="deleteTempCompile" depends="process">
+		<delete dir="${tempCompile.dir}"/>
+	</target>
+	
+	<target name="processAnnotation" depends="deleteTempCompile">
+		<echo message="Processing Annotated Code..."/>	
+	</target>
+</project>

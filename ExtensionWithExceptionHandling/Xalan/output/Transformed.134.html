@@ -1,0 +1,2522 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<div class="div1">
+  
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.1 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.2 XForms Elements</h3><div class="div3">
+<h4><a name="N65579"></a>1.2.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.2.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.2.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.2.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.2.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.3 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.3.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.3.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.3.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.3.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.4 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.5 XForms Elements</h3><div class="div3">
+<h4><a name="N66082"></a>1.5.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.5.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.5.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.5.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.5.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.6 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.6.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.6.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.6.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.6.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.7 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.8 XForms Elements</h3><div class="div3">
+<h4><a name="N66585"></a>1.8.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.8.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.8.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.8.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.8.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.9 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.9.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.9.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.9.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.9.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.10 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.11 XForms Elements</h3><div class="div3">
+<h4><a name="N67088"></a>1.11.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.11.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.11.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.11.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.11.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.12 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.12.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.12.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.12.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.12.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.13 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.14 XForms Elements</h3><div class="div3">
+<h4><a name="N67591"></a>1.14.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.14.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.14.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.14.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.14.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.15 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.15.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.15.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.15.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.15.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.16 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.17 XForms Elements</h3><div class="div3">
+<h4><a name="N68094"></a>1.17.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.17.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.17.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.17.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.17.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.18 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.18.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.18.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.18.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.18.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.19 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.20 XForms Elements</h3><div class="div3">
+<h4><a name="N68597"></a>1.20.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.20.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.20.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.20.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.20.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.21 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.21.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.21.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.21.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.21.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.22 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.23 XForms Elements</h3><div class="div3">
+<h4><a name="N69100"></a>1.23.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.23.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.23.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.23.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.23.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.24 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.24.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.24.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.24.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.24.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.25 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.26 XForms Elements</h3><div class="div3">
+<h4><a name="N69603"></a>1.26.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.26.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.26.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.26.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.26.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.27 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.27.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.27.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.27.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.27.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.28 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.29 XForms Elements</h3><div class="div3">
+<h4><a name="N70106"></a>1.29.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.29.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.29.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.29.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.29.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.30 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.30.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.30.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.30.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.30.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.31 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.32 XForms Elements</h3><div class="div3">
+<h4><a name="N70609"></a>1.32.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.32.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.32.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.32.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.32.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.33 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.33.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.33.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.33.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.33.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+
+
+<h2><a name="structure"></a>1 Document Structure</h2>
+  <p>XForms are an application of XML <a href="#">[ref-xml-1.0]</a>, and have been designed for
+  use within other XML vocabularies, in particular XHTML <a href="#">[ref-xhtml-1.0]</a>.
+  This chapter discusses some of the high-level features of XForms that 
+  allow this specification  to be used with other document types.</p>
+  <div class="div2">
+    
+<h3><a name="structure-namespace"></a>1.34 The XForms Namespace</h3>
+    <p>The XForms namespace has the URI: <code>http://www.w3.org/2001/06/xforms</code>. 
+  Future revisions are expected to use a different identifier. This document uses  
+  the convention of an <code>xform:</code> prefix to represent elements and attributes 
+  that are part of the XForms Namespace.</p>
+  <p>XForms Processors must use the XML namespaces mechanism <a href="#">[ref-xml-names]</a> 
+  to recognize elements and attributes from this namespace. Except where specifically allowed
+  by the Schema for XForms, foreign-namespaced elements are not allowed as content of elements
+  in the XForms namespace. Foreign-namespaced attributes are, however, allowed on any XForms
+  element. The XForms Processor must ignore any foreign-namespaced elements or attributes
+  that are unrecognized.</p>
+    
+  </div>
+  <div class="div2">
+<h3><a name="structure-elements"></a>1.35 XForms Elements</h3><div class="div3">
+<h4><a name="N71112"></a>1.35.1 xform</h4><p>The <code>xform</code> element is used as a container for other XForms 
+  elements, and can serve as the root element of a standalone document or be embedded 
+  in other document types such as XHTML. A single <a title="" href="#">containing document</a> 
+  may contain any number of <code>xform</code> elements.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">under discussion are  XLink attributes on the <code>xform</code> element. These are: <code>xlink:type="extended"</code> and <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> - and they should be defaulted or even fixed in the Schema/DTD.</td></tr></table>
+    <div class="example">
+      
+<h5>Example: XML Representation: &lt;<code>xform</code>&gt;</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform
+  xmlns = namespace-identifier
+  id = xsd:ID
+&gt;
+  &lt;!-- Content: (submitInfo | bind)*, model, instance --&gt;
+&lt;/xform&gt;</pre></td></tr></table>
+      <blockquote><p>
+        
+          <b>xmlns = namespace-identifier</b> - Optional standard XML attribute
+    for identifying an XML namespace. It is often useful to include this standard
+    attribute at this point.
+        <br>
+          <b>id = xsd:ID</b> - Optional unique identifier used to refer to this
+  particular <code>xform</code> element.
+      </p></blockquote>
+    </div>
+    <p>For example:</p>
+    <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;xform xmlns="http://www.w3.org/2001/06/xforms" id="Person"&gt;
+   &lt;model xlink:href="Schema-Questionnaire.xform" /&gt;
+   &lt;instance xlink:href="URL-to-retrieve-defaults" /&gt; 
+   ...
+&lt;/xform&gt;</pre></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-model"></a>1.35.2 model</h4>
+      <p>The <code>model</code> element is used to define the XForms Model. The content of the
+  XForms Model may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>model</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to an externally
+    defined XForms Model.
+        </p></blockquote>
+      </div>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-model" xlink:type="locator"</code></td></tr></table>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-instance"></a>1.35.3 instance</h4>
+      <p>The <code>instance</code> element is used to define initial instance data.
+The instance data may be defined inline or obtained from a external URI.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>instance</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;instance
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+&gt;
+  &lt;!-- Content: (##other) --&gt;
+&lt;/instance&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Optional link to externally
+  defined instance data
+        </p></blockquote>
+      </div>
+      <p>The content of the <code>instance</code> element is arbitrary XML in 
+  any namespace other than the XForms namespace. Authors must ensure that proper 
+  namespace declarations are used for content within the <code>instance</code> 
+  element.</p>
+      <table border="1" summary="Editorial note"><tr><td align="left" valign="top" width="50%"><b>Editorial note</b></td><td align="right" valign="top" width="50%">&nbsp;</td></tr><tr><td colspan="2" align="left" valign="top">As above, we need to find a place to discuss the defaulted attributes. Here they are <code>xlink:role="http://www.w3.org/2001/06/xforms-instance" xlink:type="locator"</code></td></tr></table>
+      <div class="issue"><p class="prefix"><a name="issue-schemalocation"></a><b>Issue (issue-schemalocation):</b></p>
+        <p>Should a <code>schemaLocation</code> attribute,
+  linking the instance data with a schema definition, be present here?</p>
+      </div>
+    </div><div class="div3">
+      
+<h4><a name="structure-xform-submitInfo"></a>1.35.4 submitInfo</h4>
+      <p>The <code>submitInfo</code> element provides information on how and 
+  where to submit the instance data.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>submitInfo</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;submitInfo
+  id = xsd:ID
+  xlink:href = xsd:anyURI
+  method = xsd:string
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/submitInfo&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Optional unique identifier.
+          <br>
+            <b>xlink:href = xsd:anyURI</b> - Required destination for submitted
+  instance data.
+          <br>
+            <b>method = xsd:string</b> - Optional indicator to provide details on
+  the submit protocol. With HTTP, the default is "<code>POST</code>".
+        </p></blockquote>
+      </div>
+    <div class="issue"><p class="prefix"><a name="submit-method-values"></a><b>Issue (submit-method-values):</b></p><p>The possible values for <code>method</code>, and their respective meanings, still need to be defined.</p></div></div><div class="div3">
+      
+<h4><a name="structure-xform-bind"></a>1.35.5 bind</h4>
+      <p>The <code>bind</code> element represents a connection between the different 
+  parts of XForms.</p>
+      <div class="example">
+        
+<h5>Example: XML Representation: &lt;<code>bind</code>&gt;</h5>
+        <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;bind
+  id = xsd:ID
+  ref = XForms binding expression
+&gt;
+  &lt;!-- Content: (##empty) --&gt;
+&lt;/bind&gt;</pre></td></tr></table>
+        <blockquote><p>
+          
+            <b>id = xsd:ID</b> - Required unique identifier.
+          <br>
+            <b>ref = XForms binding expression</b> - A link to an externally
+  defined XForms Model.
+        </p></blockquote>
+      </div>
+      <p>Additional details are found in the chapter <a href="#"><b>???</b></a>.</p>
+    </div></div>
+  <div class="div2">
+    
+<h3><a name="structure-xlink"></a>1.36 Integration with XLink</h3>
+    <p>XForms make good use of XLink <a href="#">[ref-xlink]</a> features. To that end, the XLink namespace is integrated in the DTD/Schema, the majority of the attributes have sensible defaults, including those based on XLink roles  defined below.</p>
+    <p>This document uses the convention of an <code>xlink:</code> prefix for the XLink namespace (informationally: as of this writing, the XLink namespace identifier is <code>http://www.w3.org/1999/xlink</code> - this may change when XLink reaches W3C Recommendation state. Please verify at <a href="#">[ref-xlink]</a>)</p>
+    <p>Note that the XLink support uses a well-defined XLink failure mode: If an XLink attribute is not provided, the element looses its XLink specific meaning. We use this feature in order to allow application developers to either provide the model and instance via an external reference (via an <code>xlink:href</code> attribute) or to provide the data inline without the attribute. In the latter case, the XLink-specific meaning of the element is lost and the inline content used. If both inline content and external reference is provided, a processor must use  the external reference and ignore the inline content.</p>
+    <p>For the purposes of XForms, we suggest that XLink aware processors switch from the <code>xlink:type="locator"</code> mode to the <code>xlink:type="resource"</code> mode. This should be specified in the document by setting <code>xlink:type="resource"</code>, though a processing agent may not depend on it. In other words, the first two of the following examples must be treated identically:</p>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, without explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: Inline XForms Model, with explicit change to the <code>xlink:type</code>
+      </h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:type="resource"&gt;
+  &lt;!-- Content: ( schema subset syntax ) --&gt;
+&lt;/model&gt;</pre></td></tr></table>
+    </div>
+    <div class="example">
+      
+<h5>Example: External XForms Model</h5>
+      <table class="eg" cellpadding="5" border="1" bgcolor="#99ffff" width="100%" summary="Example"><tr><td><pre>&lt;model xlink:href="URI" /&gt;</pre></td></tr></table>
+    </div>
+    <p>XLink as originally specified allows users to provide arc-type elements to specify traversal rules. The integration of arc-type elements in XForms would require additional elements in the <code>xform</code> element that are otherwise not necessary for XForms. Hence, for children of the <code>xform</code> element, the traversal rule is to traverse <code>xlink:from</code> the current document <code>xlink:to</code> the document pointed to by the external resource. The processor should behave as if <code>xlink:actuate="onLoad"</code> was specified. The <code>xlink:show</code> attribute is meaningless in this context, anyway.</p>
+    <p>An XForms processor is not required to implement full XLink--correct behavior of the <code>xlink:href</code> attribute (as defined above) is sufficient. It is permissible to construct the additional information from the semantics of the elements. An XForms Processor can not be XForms compliant, however, if it attempts to implement XLink and the implementation does not conform to XLink specification with respect to the attributes used by XForms.</p>
+    <p>The following definition of the XLink roles defines the relationship between the various resources participating in a XForms-based form, not properties that are inherent to the resources. It is perfectly permissible for the same resource to participate in various XForms-based forms in different roles.</p>
+    <div class="div3">
+      
+<h4><a name="xlink-role-all"></a>1.36.1 XLink role for XForms</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms"</code> must assume that the arcs associated with the other XLink roles for XForms (see below) behave as above. In other words, this XLink role is an additional hint beyond the element names for an XLink processor to identify the arcs. For all roles, if element names and XLink behavior conflict, XLink role behavior prevails.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-model"></a>1.36.2 XLink role for the XForms Model</h4>
+      <p>The xlink-role for XForms Models is <code>http://www.w3.org/2001/06/xforms-model</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-model"</code> must assume that the referenced resource relates to the other resources as XForms Model as defined in <a href="#"><b>???</b></a>.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-instance"></a>1.36.3 XLink role for the Instance Data</h4>
+      <p>The xlink-role for XForms Instances is <code>http://www.w3.org/2001/06/xforms-instance</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-instance"</code> must assume that the referenced resource is the initialization data of a form.</p>
+    </div>
+    <div class="div3">
+      
+<h4><a name="xlink-role-ui"></a>1.36.4 XLink role for the XForms User Interface</h4>
+      <p>The xlink-role for XForms User Interfaces is <code>http://www.w3.org/2001/06/xforms-ui</code>. This means that XLink processors encountering a link with a <code>xlink:role="http://www.w3.org/2001/06/xforms-ui"</code> must assume that the referenced resource is the user interface of a form. Note that this role does not make an assertion about the content type of the referenced resource other than that it is an XML format. For example, it can be XHTML+XForms, pure XForms, SVG+XForms or pure SVG any other combination. This role does not correspond to any element defined in XForms; it is defined so that XLink linkbases <a href="#">[ref-xlink]</a> can be established containing all the information about a XForms document.</p>
+    </div>
+  </div>
+</div>

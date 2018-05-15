@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="Montecarlo" basedir="." default="main">
+	<property name="src.dir"        value="src" />
+	<property name="build.dir"      value="bin" />
+	<property name="libs.dir"       value="libs"/>
+	<property name="gen.dir"        value="gen" />
+	<property name="tempGen.dir"    value="tempGen"/>
+	<property name="tmp.dir"		value="tmp" />
+	<property name="MTJAR.dir"     value="${gen.dir}/MontCarlo"        />
+	<property name="MTEXECJAR"     value="${MTJAR.dir}/MonteCarlo.jar" />
+	<property name="@PTJAR"      value="${libs.dir}/@PT-1.5.2.jar" />
+	<property name="JOMPJAR"       value="${libs.dir}/jomp-1.0.jar"    />
+	<property name="PJJAR"	       value="${libs.dir}/pyjama-1.5.2.jar"/>
+	
+	<target name="decideOS">
+		<condition property="isWindows">
+			<os family="windows"/>
+		</condition>
+		<condition property="isLinux">
+			<os family="unix"/>
+		</condition>
+	</target>
+	
+	<target name="winDelim" depends="decideOS" if="isWindows">
+		<property name="Delimiter" value=";" />
+		<echo message="The OS is identified to be of Windows family!" />
+	</target>
+	
+	<target name="linDelim" depends="decideOS" if="isLinux">
+		<property name="Delimiter" value=":" />
+		<echo message="The OS is identified to be of Unix/Linux family!"/>
+	</target>
+	
+	<target name="clean" depends="winDelim, linDelim">
+		<delete dir="${build.dir}" />
+		<delete dir="${MTJAR.dir}" />
+	</target>
+	
+	<target name="mkDir" depends="clean">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${gen.dir}"  />
+		<mkdir dir="${MTJAR.dir}"/>
+	</target>
+	
+	<target name="compile" depends="mkDir">
+		<javac  srcdir="${src.dir}"  destdir="${build.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"/>
+				<pathelement path="${PJJAR}"   />
+				<pathelement path="${JOMPJAR}" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<!-- CREATING THE EXECUTABLE JAR FILE -->
+	
+	<target name="compressJar" depends="compile">
+		<jar destfile="${MTEXECJAR}"  basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="main.Main"/>
+			</manifest>
+			<zipgroupfileset dir="${libs.dir}" includes="**/*.jar"/>
+		</jar>
+	</target>
+	
+	<!-- EXECUTING THE EXECUTABLE JAR FILE -->
+	
+	<target name="main" depends="compressJar">
+		<java jar="${MTEXECJAR}" fork="true"></java>
+	</target>
+	
+	<!-- *******************  PROCESSING ANNOTATIONS   ****************** -->
+	
+	<target name="mkTmpDir" depends="winDelim, linDelim">
+		<delete dir="${gen.dir}"/>
+		<delete dir="${tempGen.dir}"/>
+		<mkdir dir="${tmp.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<mkdir dir="${tempGen.dir}"/>
+	</target>
+	
+	<target name="tempCompile" depends="mkTmpDir">
+		<javac srcdir="${src.dir}" destdir="${tmp.dir}">
+			<classpath>
+				<pathelement path="${@PTJAR}"/>
+				<pathelement path="${PJJAR}"/>
+				<pathelement path="${JOMPJAR}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="process" depends="tempCompile">
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${tmp.dir} spoon.Launcher -o ${gen.dir} -i ${src.dir} -p apt.processors.AptInitParaTaskProcessor"/>
+		</exec>
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${tmp.dir} spoon.Launcher -o ${tempGen.dir} -i ${gen.dir} -p apt.processors.AptFutureProcessor"/>
+		</exec>
+		<delete dir="${gen.dir}"/>
+		<mkdir dir="${gen.dir}"/>
+		<exec executable="java">
+			<arg line="-cp ${@PTJAR}${Delimiter}${PJJAR}${Delimiter}${JOMPJAR}${Delimiter}${tmp.dir} spoon.Launcher -o ${gen.dir} -i ${tempGen.dir} -p apt.processors.AptGuiProcessor"/>
+		</exec>
+		<delete dir="${tempGen.dir}"/>
+	</target>
+	
+	<target name="deleteTmp" depends="process">
+		<delete dir="${tmp.dir}"/>
+	</target>
+	
+	<target name="processAnnotation" depends="deleteTmp">
+		<echo message="Processing @PT Annotated Code..."/>			
+	</target>
+</project>

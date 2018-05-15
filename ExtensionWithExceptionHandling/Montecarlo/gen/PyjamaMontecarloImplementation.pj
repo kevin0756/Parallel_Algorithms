@@ -1,0 +1,50 @@
+package montecarlo.implementation;
+
+import java.util.Vector;
+import main.*;
+import pj.*;
+
+public class PyjamaMontecarloImplementation extends AbstractMontecarloImplementation{
+	private String schedulingPolicy;
+
+	public PyjamaMontecarloImplementation(String schedulingPolicy) {
+		this.schedulingPolicy = schedulingPolicy;
+	}
+
+	@Override
+	public void runSerial() {
+		results = new Vector(nRunsMC);
+		switch(schedulingPolicy) {
+		case "static":
+			//#omp parallel for schedule(static, 625)
+			for (int i = 0; i < nRunsMC; i++) {
+				performSerialIteration(i);
+			}
+			break;
+			
+		case "dynamic":
+			//#omp parallel for schedule(dynamic, 625)
+			for (int i = 0; i < nRunsMC; i++) {
+				performSerialIteration(i);
+			}
+			break;
+			
+		case "guided":
+			//#omp parallel for schedule(guided, 625)
+			for (int i = 0; i < nRunsMC; i++) {
+				performSerialIteration(i);
+			}
+			break;
+		default:
+			throw new IllegalArgumentException("Pyjama scheduling policy: " + schedulingPolicy + " is invalid. Please use one of static, dynamic, or guided");	
+		}
+	}
+
+	private void performSerialIteration(int i) {
+		PriceStock ps = new PriceStock();
+		ps.setInitAllTasks(initAllTasks);
+		ps.setTask(tasks.elementAt(i));
+		ps.run();
+		results.addElement(ps.getResult());
+	}
+}
