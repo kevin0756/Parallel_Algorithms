@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import pt.runtime.WorkerThread;
-
 public class Prim {
     // Number of vertices in the graph
     private static final int V=10;
